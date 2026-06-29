@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اكتشف شخصيتك في العائلة</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+
+  :root {
+    --bg: #0f0e17;
+    --surface: #1a1828;
+    --card: #221f35;
+    --accent: #f7a325;
+    --accent2: #e05c5c;
+    --text: #fffffe;
+    --muted: #a7a9be;
+    --radius: 18px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .screen { display: none; width: 100%; max-width: 500px; animation: fadeIn .4s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== WELCOME ===== */
+  .welcome-wrap {
+    text-align: center;
+    padding: 40px 24px;
+  }
+
+  .logo-circle {
+    width: 90px; height: 90px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 42px;
+    margin: 0 auto 24px;
+    box-shadow: 0 0 40px rgba(247,163,37,.3);
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1.3;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, var(--accent), #fff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+
+  .role-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .roles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .role-btn {
+    background: var(--card);
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    padding: 16px 12px;
+    cursor: pointer;
+    transition: all .25s;
+    color: var(--text);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .role-btn .role-icon { font-size: 28px; }
+
+  .role-btn:hover { border-color: var(--accent); background: rgba(247,163,37,.08); }
+  .role-btn.selected { border-color: var(--accent); background: rgba(247,163,37,.15); box-shadow: 0 0 20px rgba(247,163,37,.2); }
+
+  .role-btn.full-width { grid-column: 1 / -1; }
+
+  .start-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--accent), #f7821a);
+    border: none;
+    border-radius: var(--radius);
+    color: #0f0e17;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all .25s;
+    opacity: .4;
+    pointer-events: none;
+  }
+
+  .start-btn.ready { opacity: 1; pointer-events: all; }
+  .start-btn.ready:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(247,163,37,.4); }
+
+  /* ===== QUIZ ===== */
+  .quiz-wrap { padding: 16px; }
+
+  .progress-bar-wrap {
+    background: var(--card);
+    border-radius: 99px;
+    height: 6px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width .4s ease;
+  }
+
+  .q-counter {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .q-text {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    background: var(--card);
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    cursor: pointer;
+    text-align: right;
+    color: var(--text);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .option-letter {
+    width: 30px; height: 30px;
+    background: var(--surface);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .option-btn:hover { border-color: var(--accent); background: rgba(247,163,37,.08); }
+  .option-btn.selected { border-color: var(--accent); background: rgba(247,163,37,.15); }
+  .option-btn.selected .option-letter { background: var(--accent); color: #0f0e17; }
+
+  .next-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent), #f7821a);
+    border: none;
+    border-radius: var(--radius);
+    color: #0f0e17;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 17px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all .25s;
+    opacity: .3;
+    pointer-events: none;
+  }
+
+  .next-btn.ready { opacity: 1; pointer-events: all; }
+  .next-btn.ready:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(247,163,37,.35); }
+
+  /* ===== RESULT ===== */
+  .result-wrap {
+    text-align: center;
+    padding: 32px 20px;
+  }
+
+  .result-icon {
+    font-size: 72px;
+    margin-bottom: 12px;
+    animation: popIn .5s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .result-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0f0e17;
+    font-size: 13px;
+    font-weight: 900;
+    padding: 5px 14px;
+    border-radius: 99px;
+    margin-bottom: 14px;
+    letter-spacing: .5px;
+  }
+
+  .result-title {
+    font-size: 26px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .result-tagline {
+    font-size: 15px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .result-desc {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #d4d3e8;
+    text-align: right;
+    border-right: 3px solid var(--accent);
+    margin-bottom: 24px;
+  }
+
+  .share-note {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .retry-btn {
+    background: var(--card);
+    border: 2px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 14px 28px;
+    color: var(--accent);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .25s;
+  }
+
+  .retry-btn:hover { background: rgba(247,163,37,.1); }
+
+  /* confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div class="screen active" id="screen-welcome">
+  <div class="welcome-wrap">
+    <div class="logo-circle">🏠</div>
+    <h1>اكتشف شخصيتك في العائلة</h1>
+    <p class="subtitle">١٣ سؤال بسيط وفي النهاية تعرف أكثر عن نفسك من منظور العائلة 😄</p>
+
+    <p class="role-label">أولاً — ما مركزك في العائلة؟</p>
+    <div class="roles-grid">
+      <button class="role-btn" onclick="selectRole('أب', '👨')" id="role-أب">
+        <span class="role-icon">👨</span>
+        <span>أب</span>
+      </button>
+      <button class="role-btn" onclick="selectRole('أم', '👩')" id="role-أم">
+        <span class="role-icon">👩</span>
+        <span>أم</span>
+      </button>
+      <button class="role-btn" onclick="selectRole('ابن/بنت كبير', '🌟')" id="role-ابن/بنت كبير">
+        <span class="role-icon">🌟</span>
+        <span>ابن/بنت كبير</span>
+      </button>
+      <button class="role-btn" onclick="selectRole('ابن/بنت أوسط', '⚡')" id="role-ابن/بنت أوسط">
+        <span class="role-icon">⚡</span>
+        <span>ابن/بنت أوسط</span>
+      </button>
+      <button class="role-btn full-width" onclick="selectRole('ابن/بنت أصغر', '🎮')" id="role-ابن/بنت أصغر">
+        <span class="role-icon">🎮</span>
+        <span>ابن/بنت أصغر — آخر العنقود</span>
+      </button>
+    </div>
+
+    <button class="start-btn" id="start-btn" onclick="startQuiz()">ابدأ الاختبار ←</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-wrap">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    </div>
+    <p class="q-counter" id="q-counter">سؤال ١ من ١٣</p>
+    <p class="q-text" id="q-text"></p>
+    <div class="options" id="options"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">التالي ←</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-wrap">
+    <div class="result-icon" id="result-icon"></div>
+    <div class="result-tag" id="result-tag"></div>
+    <div class="result-title" id="result-title"></div>
+    <div class="result-tagline" id="result-tagline"></div>
+    <div class="result-desc" id="result-desc"></div>
+    <p class="share-note">📲 شارك نتيجتك مع العائلة!</p>
+    <button class="retry-btn" onclick="restart()">🔄 أعد الاختبار</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    text: "لو عندك يوم إجازة كامل، أول شي تسويه؟",
+    options: ["أرتاح في البيت وأروق", "أطلع مع الأهل أو الأصحاب", "أشتغل على شي أحبه", "أروح مكان جديد ما زرته"]
+  },
+  {
+    text: "لو صار خلاف بين شخصين قريبين منك، موقفك؟",
+    options: ["أتدخل وأحاول أصلح", "أسمع الطرفين بدون ما أحكم", "أبتعد وأخليهم يحلونها", "أقول رأيي بصراحة حتى لو ما عجبهم"]
+  },
+  {
+    text: "وين تكون في أي لمة عائلية؟",
+    options: ["في الوسط وأحرك الجو", "أجلس مع ناس محددين وأتكلم بعمق", "أساعد وأرتب وأخدم", "أراقب وأضحك بيني وبين نفسي"]
+  },
+  {
+    text: "لو قدمت لك فرصة كبيرة لكنها محفوفة بالمخاطر؟",
+    options: ["أقفز عليها", "أدرسها وآخذ رأي الناس", "أتردد كثيراً قبل ما أقرر", "أنتظر فرصة أضمن منها"]
+  },
+  {
+    text: "كيف تتعامل لو جاك ضغط كبير فجأة؟",
+    options: ["أثبت وأبدأ أحل خطوة خطوة", "أتكلم مع أحد أثق فيه", "أحتاج وقت لوحدي أرتب أفكاري", "أتوتر في البداية لكن أتعافى بسرعة"]
+  },
+  {
+    text: "إيش أكثر شي يشعرك بالرضا؟",
+    options: ["إني أنجزت شي بيدي", "إني ساعدت أحد", "إني تعلمت شي جديد", "إني قضيت وقت ممتع مع من أحبهم"]
+  },
+  {
+    text: "لو قالوا لك اختر رحلة، أي نوع تختار؟",
+    options: ["مغامرة في الطبيعة", "رحلة ثقافية وتاريخية", "إجازة هادئة على البحر أو الجبل", "جولة في مدينة حيوية وأسواق"]
+  },
+  {
+    text: "أكثر شي يزعجك في الناس؟",
+    options: ["عدم الاحترام", "الكذب والنفاق", "الفوضى وعدم التنظيم", "الأنانية وعدم المبالاة"]
+  },
+  {
+    text: "كيف تتخذ قراراتك؟",
+    options: ["بالحدس والإحساس", "بالتفكير والتحليل", "بعد ما أشاور الناس", "أتأخر لأني أخاف الغلط"]
+  },
+  {
+    text: "إيش أكثر شي يصفك؟",
+    options: ["منظم ودقيق", "عاطفي وحساس", "عملي وواقعي", "مرن ومتكيف"]
+  },
+  {
+    text: "لو تكتب جملة عن نفسك؟",
+    options: ["أنا اللي يعتمد عليه الكل", "أنا اللي يجيب الابتسامة", "أنا اللي يفكر قبل ما يتكلم", "أنا اللي ما يتوقعه أحد"]
+  },
+  {
+    text: "إيش أهم شي عندك في الحياة؟",
+    options: ["النجاح والإنجاز", "الاستقرار والأمان", "العلاقات والمحبة", "التجربة والاكتشاف"]
+  },
+  {
+    text: "هل عندك حيوان أليف؟",
+    options: ["قطة 🐱", "كلب 🐕", "طير أو سمك 🐦", "ما عندي"]
+  }
+];
+
+const results = {
+  "أب": {
+    icon: "👨",
+    tag: "الأب",
+    versions: [
+      {
+        title: "عمقك أكبر مما يظهر",
+        tagline: "هادئ من الخارج، واعي من الداخل",
+        desc: "ما تحتاج تصرخ عشان يُسمع كلامك — هدوءك هو قوتك. تحب التفاصيل وتصبر عليها، وعندك قدرة نادرة على الحزم واللين في نفس الوقت. الناس تعتمد عليك وأنت تعطيهم بهدوء، بدون ما تطلب تصفيق."
+      },
+      {
+        title: "هادئ لدرجة إن الناس ما تقدر تقرأك",
+        tagline: "عمقك حقيقي لكنه محجوب",
+        desc: "هادئ لدرجة إن الناس أحياناً ما تعرف إيش يدور في بالك. تحب التفاصيل — بل تغرق فيها. صبرك ميزة لكنه أحياناً يخلي القرار يتأخر أكثر من اللازم."
+      },
+      {
+        title: "برودتك سلاح ذو حدين",
+        tagline: "قوتك أحياناً تخليك بعيد",
+        desc: "برودتك تثبّت الناس من جهة، وتخليهم ما يقدرون يقرأونك من جهة ثانية. وغرقك في التفاصيل؟ أحياناً تفاهة تاخذ منك ٣ أيام 😂"
+      },
+      {
+        title: "بارد من الخارج، صعب من الداخل",
+        tagline: "الكل يعتمد عليك لأنك ما قلت لا",
+        desc: "ما أحد يعرف إيش تحس فيه لأنك ما تبين. التفاصيل تستهلكك وتعرف هذا — بس ما تقدر توقف. والكل يعتمد عليك لأنك ما قلت لا في حياتك 😂"
+      }
+    ]
+  },
+  "أم": {
+    icon: "👩",
+    tag: "الأم",
+    versions: [
+      {
+        title: "أكثر واحدة تحمل وأقل واحدة تشتكي",
+        tagline: "قلبك يشتغل على الكل في نفس الوقت",
+        desc: "حرصك يسبق كلامك، واهتمامك أحياناً يطلع بطريقة ما يفهمها إلا من يعرفك. تخافين لأنك تحبين، وتتابعين لأن البال ما يرتاح. وحتى لو ما أحد قال شكراً — أنتِ اللي تحرك هذا البيت."
+      },
+      {
+        title: "حريصة لدرجة إن البال ما يرتاح",
+        tagline: "قلبك كبير وخوفك أكبر",
+        desc: "حريصة على الكل لدرجة إن البال ما يرتاح — حتى على أشياء ما صارت بعد. ردة فعلك تسبق التفكير أحياناً، لكن من يعرفك يعرف إن الخوف من الحب."
+      },
+      {
+        title: "تعطين أوامر لأنك تحبين",
+        tagline: "بس اللي حواليك يحتاج يسمع التفسير",
+        desc: "تعطين أوامر لأنك تحبين، وتنتقدين لأنك تريدين الأفضل — بس الناس اللي حواليك أحياناً تحتاج تسمع هذا التفسير 😂 ردة فعلك سريعة ومبالغ فيها شوية، وأنتِ أول من يعرف."
+      },
+      {
+        title: "قلبك كبير جداً وصوتك يعبر عنه بطريقته",
+        tagline: "ما أحد يقدر يستغني عنك",
+        desc: "الخوف من الصراصير والخوف على العيال من نفس المصدر: حساسية عالية ومحبة ما تعرف تخبيها 😂 والكل يشتكي من الأوامر لكن ما أحد يقدر يستغني عنك."
+      }
+    ]
+  },
+  "ابن/بنت كبير": {
+    icon: "🌸",
+    tag: "البنت الكبرى",
+    versions: [
+      {
+        title: "ما تكتم شي وما تتعذب بصمت",
+        tagline: "حركية، حيوية، قلبها في كل مكان",
+        desc: "فرحك يملأ الغرفة وحزنك ما تكتمه — وهذي شجاعة مو ضعف. تحبين البيت وتفاصيله، من المطبخ للقطة اللي تعتبرينها فرد من العائلة. قلبك رقيق على كل شي حواليك، حتى على اللي ما يتكلم."
+      },
+      {
+        title: "مشاعرك على السطح دايماً",
+        tagline: "صادقة لكن أحياناً متعبة",
+        desc: "فرح، حزن، انزعاج — الكل يعرف كيف تحسين قبل ما تتكلمين. حركيتك ميزة لكنها أحياناً تعبك قبل ما تعبت الناس اللي حواليك."
+      },
+      {
+        title: "ما عندك فلتر للمشاعر",
+        tagline: "صادقة جداً لدرجة إن اللي جنبك يتعب",
+        desc: "ما عندك فلتر للمشاعر — وهذا يخليك صادقة لكن أحياناً متعبة 😄 القطة تفهمك أكثر من الناس لأنها ما ترد عليك 😂 وبكاءك على أشياء صغيرة مو ضعف — بس اللي جنبك أحياناً ما يعرف كيف يتعامل."
+      },
+      {
+        title: "حساسة، حركية، ما تسكت",
+        tagline: "مشاعرك حقيقية بس مو كل موقف يحتاج ردة فعل",
+        desc: "حساسة، حركية، ما تسكت، وقلبك يتعلق بكل شي — من الطبخة اللي طلعت روعة لحد القطة اللي اختفت ربع ساعة 😂 مشاعرك حقيقية وكبيرة، بس تعلمي إن مو كل موقف يحتاج ردة فعل كاملة 😄"
+      }
+    ]
+  },
+  "ابن/بنت أوسط": {
+    icon: "⚡",
+    tag: "الابن الأوسط",
+    versions: [
+      {
+        title: "نشمي يسأل ولا يكتفي",
+        tagline: "الفزعة في دمه والفضول في عقله",
+        desc: "عندك طاقة وعندك فضول، تحب تفهم كل شي من أوله لآخره. الفزعة في دمك والخدمة طبعك — خصوصاً لأمك. وعلاقتك مع أبوك مو علاقة أب وابن بس، أحياناً تحسون إنكم زملاء بحث في أدق التفاصيل 😄"
+      },
+      {
+        title: "فضولك ما له حدود",
+        tagline: "تحب تفهم كل شي حتى اللي ما يستاهل",
+        desc: "فضولك ما له حدود — تحب تفهم كل شي وتدخل في كل نقاش. طاقتك عالية وخدمتك طيبة، بس أحياناً نقاشاتك في التفاصيل تخلي اللي حواليك يتساءل إيش اللي يتكلمون فيه 😄"
+      },
+      {
+        title: "نشمي وفضولي وما تقدر تسكت",
+        tagline: "حماسك أحياناً يسبق تفكيرك",
+        desc: "نشمي وفضولي وما تقدر تسكت على معلومة ناقصة — حتى لو الموضوع ما يستاهل ساعة نقاش 😂 خدمتك لأمك من القلب، بس حماسك أحياناً يسبق تفكيرك."
+      },
+      {
+        title: "طاقتك نعمة لكن تحتاج زر إيقاف",
+        tagline: "اللي يجلس جنبك يخرج ولا يدري وش السالفة",
+        desc: "تحب الفزعة، تحب النقاش، تحب التفاصيل — وتحب تكون على علم بكل شي 😂 اللي يجلس جنبك في نقاش مع أبوك يخرج وهو ما يدري وش السالفة. طاقتك نعمة لكن أحياناً تحتاج زر إيقاف مؤقت 😄"
+      }
+    ]
+  },
+  "ابن/بنت أصغر": {
+    icon: "🎮",
+    tag: "الابن الأصغر",
+    versions: [
+      {
+        title: "كلاسيكي بروح متقلبة",
+        tagline: "ذوقه أصيل وقلبه طيب",
+        desc: "تحب الأشياء القديمة وتفخر بذوقك، وإذا وقعت على شي يعجبك ما تتركه حتى تختمه. قلبك طيب وكلامك أحياناً يسبق عقلك — وأنت أول من يعرف هذا. شخصيتك تملأ الغرفة، وما أحد يقدر يتجاهلك."
+      },
+      {
+        title: "ذوقك أصيل وما تتنازل عنه",
+        tagline: "كلاسيكي في عالم ما يفهم الكلاسيك",
+        desc: "ذوقك أصيل وما تتنازل عنه — كلاسيكي في عالم ما يفهم الكلاسيك 😄 وإذا وقعت على لعبة تعجبك، الدنيا تقف حتى تخلص منها. قلبك طيب بس المزاج يتقلب بسرعة."
+      },
+      {
+        title: "عندك رأي في كل شي وما تسكت عليه",
+        tagline: "الكلام يطلع قبل التفكير",
+        desc: "عندك رأي في كل شي وما تسكت عليه 😂 ذوقك 'كلاسيكي' وأي شي ثاني عندك عليه ملاحظة. اللعبة اللي تعجبك تاخذ منك أيام بدون رجعة — والكل يعرف إنك إذا عصبت، الكلام يطلع قبل التفكير."
+      },
+      {
+        title: "٩ سنين وعندك شخصية ما تنكسر",
+        tagline: "آخر العنقود بس ما أحد يجرأ يقوله",
+        desc: "كلاسيكي، عنيد في ذوقه، يعصب بسرعة — وبعدين يرجع طيب كأن ما صار شي 😂 آخر العنقود بس ما أحد يتجرأ يقول له هذا بوجهه 😄"
+      }
+    ]
+  }
+};
+
+let selectedRole = null;
+let currentQ = 0;
+let answers = [];
+let retryCount = 0;
+
+function selectRole(role, icon) {
+  selectedRole = role;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('role-' + role).classList.add('selected');
+  const btn = document.getElementById('start-btn');
+  btn.classList.add('ready');
+}
+
+function startQuiz() {
+  if (!selectedRole) return;
+  currentQ = 0;
+  answers = [];
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-counter').textContent = `سؤال ${toArabicNum(currentQ + 1)} من ${toArabicNum(questions.length)}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('progress-bar').style.width = ((currentQ / questions.length) * 100) + '%';
+
+  const optionsEl = document.getElementById('options');
+  const letters = ['أ', 'ب', 'ج', 'د'];
+  optionsEl.innerHTML = q.options.map((opt, i) => `
+    <button class="option-btn" onclick="selectOption(${i})">
+      <span class="option-letter">${letters[i]}</span>
+      <span>${opt}</span>
+    </button>
+  `).join('');
+
+  document.getElementById('next-btn').classList.remove('ready');
+  document.getElementById('next-btn').textContent = currentQ === questions.length - 1 ? 'اكتشف شخصيتك 🎉' : 'التالي ←';
+}
+
+function selectOption(i) {
+  document.querySelectorAll('.option-btn').forEach((b, idx) => {
+    b.classList.toggle('selected', idx === i);
+  });
+  answers[currentQ] = i;
+  document.getElementById('next-btn').classList.add('ready');
+}
+
+function nextQuestion() {
+  if (answers[currentQ] === undefined) return;
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  const r = results[selectedRole];
+  const versionIndex = Math.min(retryCount, r.versions.length - 1);
+  const v = r.versions[versionIndex];
+  document.getElementById('result-icon').textContent = r.icon;
+  document.getElementById('result-tag').textContent = r.tag;
+  document.getElementById('result-title').textContent = v.title;
+  document.getElementById('result-tagline').textContent = v.tagline;
+  document.getElementById('result-desc').textContent = v.desc;
+  document.getElementById('progress-bar').style.width = '100%';
+  showScreen('screen-result');
+  launchConfetti();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function restart() {
+  retryCount++;
+  selectedRole = null;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('start-btn').classList.remove('ready');
+  showScreen('screen-welcome');
+}
+
+function toArabicNum(n) {
+  return n.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+}
+
+function launchConfetti() {
+  const colors = ['#f7a325', '#e05c5c', '#7b5ea7', '#4fc4cf', '#ffffff'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `
+      left: ${Math.random() * 100}vw;
+      top: -10px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      width: ${6 + Math.random() * 8}px;
+      height: ${6 + Math.random() * 8}px;
+      animation-duration: ${1.5 + Math.random() * 2}s;
+      animation-delay: ${Math.random() * .8}s;
+      border-radius: ${Math.random() > .5 ? '50%' : '2px'};
+    `;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+</script>
+</body>
+</html>
